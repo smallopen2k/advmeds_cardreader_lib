@@ -1,0 +1,2 @@
+include ':app', ':advmeds-cardreader-lib'
+rootProject.name='Advmeds_Cardreader'
