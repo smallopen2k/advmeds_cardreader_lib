@@ -6,17 +6,18 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.util.Log;
 
 import com.acs.bluetooth.Acr1255uj1Reader;
 import com.acs.bluetooth.Acr3901us1Reader;
 import com.acs.bluetooth.BluetoothReader;
 import com.acs.bluetooth.BluetoothReaderGattCallback;
 import com.acs.bluetooth.BluetoothReaderManager;
-import com.advmeds.mphr_health_go.cardreader.acs.BleACSUtils;
-import com.advmeds.mphr_health_go.cardreader.acs.ble.decoder.AcsBleBaseDecoder;
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.BleACSUtils;
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.ble.decoder.AcsBleBaseDecoder;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import timber.log.Timber;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+
 
 public class AcsBaseDevice {
     private AcsBaseCallBack callBack;
@@ -56,9 +57,9 @@ public class AcsBaseDevice {
                     public void onConnectionStateChange(
                             final BluetoothGatt gatt, final int state,
                             final int newState) {
-                        Timber.d("GATT VIEW_NOW_STATUS : %s", state);
+                        Log.d("AcsBaseDevice ", "GATT VIEW_NOW_STATUS : " + state);
 
-                        Timber.d("GATT NEW VIEW_NOW_STATUS : %s", newState);
+                        Log.d("AcsBaseDevice ", "GATT NEW VIEW_NOW_STATUS : " + newState);
 
                         if (newState == BluetoothProfile.STATE_CONNECTED) {
 
@@ -66,11 +67,11 @@ public class AcsBaseDevice {
                                 mBluetoothReaderManager.detectReader(
                                         gatt, mGattCallback);
                             }
-                            Timber.d("GATT STATE_CONNECTED");
+                            Log.d("AcsBaseDevice ", "GATT STATE_CONNECTED");
                         } else if (newState == BluetoothProfile.STATE_CONNECTING) {
-                            Timber.d("STATE_CONNECTING");
+                            Log.d("AcsBaseDevice ", "STATE_CONNECTING");
                         } else {
-                            Timber.d("STATE_DISCONNECTED OR ELSE");
+                            Log.d("AcsBaseDevice ", "STATE_DISCONNECTED OR ELSE");
 
                             mBluetoothReader = null;
 
@@ -95,14 +96,14 @@ public class AcsBaseDevice {
                     public void onReaderDetection(BluetoothReader reader) {
                         if (reader instanceof Acr3901us1Reader) {
                             /* The connected reader is ACR3901U-S1 reader. */
-                            Timber.e("On Acr3901us1Reader Detected.");
+                            Log.e("AcsBaseDevice ", "On Acr3901us1Reader Detected.");
                         } else if (reader instanceof Acr1255uj1Reader) {
                             /* The connected reader is ACR1255U-J1 reader. */
-                            Timber.e("On Acr1255uj1Reader Detected.");
+                            Log.e("AcsBaseDevice ", "On Acr1255uj1Reader Detected.");
                         } else {
                             disconnectReader();
 
-                            Timber.d("斷線 STATE_DISCONNECTED");
+                            Log.d("AcsBaseDevice ", "斷線 STATE_DISCONNECTED");
 
                             return;
                         }
@@ -124,7 +125,7 @@ public class AcsBaseDevice {
         BluetoothManager bluetoothManager =
                 (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null) {
-            Timber.e("Unable to initialize BluetoothManager.");
+            Log.e("AcsBaseDevice ", "Unable to initialize BluetoothManager.");
 
             callBack.onBtReaderStatusChanged(BluetoothReader.STATE_DISCONNECTED);
 
@@ -133,7 +134,7 @@ public class AcsBaseDevice {
 
         BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null) {
-            Timber.e("Unable to obtain a BluetoothAdapter.");
+            Log.e("AcsBaseDevice ", "Unable to obtain a BluetoothAdapter.");
             callBack.onBtReaderStatusChanged(BluetoothReader.STATE_DISCONNECTED);
 
             return;
@@ -144,7 +145,7 @@ public class AcsBaseDevice {
          */
         /* Clear old GATT connection. */
         if (mBluetoothGatt != null) {
-            Timber.e("Clear old GATT connection");
+            Log.e("AcsBaseDevice ", "Clear old GATT connection");
 
             mBluetoothGatt.disconnect();
 
@@ -158,7 +159,7 @@ public class AcsBaseDevice {
                 .getRemoteDevice(mDeviceAddress);
 
         if (device == null) {
-            Timber.e("Device not found. Unable to connect.");
+            Log.e("AcsBaseDevice ", "Device not found. Unable to connect.");
 
             callBack.onBtReaderStatusChanged(BluetoothReader.STATE_DISCONNECTED);
 
@@ -176,13 +177,13 @@ public class AcsBaseDevice {
         mConnectState = connectState;
 
         if (connectState == BluetoothReader.STATE_CONNECTING) {
-            Timber.d("連線中");
+            Log.d("AcsBaseDevice ", "連線中");
         } else if (connectState == BluetoothReader.STATE_CONNECTED) {
-            Timber.d("已連線");
+            Log.d("AcsBaseDevice ", "已連線");
         } else if (connectState == BluetoothReader.STATE_DISCONNECTING) {
-            Timber.d("斷線中");
+            Log.d("AcsBaseDevice ", "斷線中");
         } else {
-            Timber.d("已斷線");
+            Log.d("AcsBaseDevice ", "已斷線");
         }
     }
 
@@ -212,7 +213,7 @@ public class AcsBaseDevice {
                         public void onBatteryStatusChange(
                                 BluetoothReader bluetoothReader,
                                 final int batteryStatus) {
-                            Timber.e("mBatteryStatusListener data: " + batteryStatus);
+                            Log.e("AcsBaseDevice ", "mBatteryStatusListener data: " + batteryStatus);
                         }
 
                     });
@@ -224,7 +225,7 @@ public class AcsBaseDevice {
                         public void onBatteryLevelChange(
                                 BluetoothReader bluetoothReader,
                                 final int batteryLevel) {
-                            Timber.e("mBatteryLevelListener data: " + batteryLevel);
+                            Log.e("AcsBaseDevice ", "mBatteryLevelListener data: " + batteryLevel);
                         }
 
                     });
@@ -235,10 +236,10 @@ public class AcsBaseDevice {
                     @Override
                     public void onCardStatusChange(
                             BluetoothReader bluetoothReader, final int sta) {
-                        Timber.e("mCardStatusListener c " + sta);
+                        Log.e("AcsBaseDevice ", "mCardStatusListener c " + sta);
 
                         if (sta == BluetoothReader.CARD_STATUS_PRESENT) {
-                            Timber.d("sta = 2");
+                            Log.d("AcsBaseDevice ", "sta = 2");
 
                             nowDecoderIndex = 0;
 
@@ -247,52 +248,59 @@ public class AcsBaseDevice {
                             callBack.onCardRemove();
                         }
 
-                        Timber.d(getCardStatusString(sta));
+                        Log.d("AcsBaseDevice ", getCardStatusString(sta));
                     }
 
                 });
 
         /* Wait for authentication completed. */
-        mBluetoothReader
-                .setOnAuthenticationCompleteListener((bluetoothReader, errorCode) -> {
-                    if (errorCode == BluetoothReader.ERROR_SUCCESS) {
-                        Timber.d("Authentication Success!");
+        mBluetoothReader.setOnAuthenticationCompleteListener(new BluetoothReader.OnAuthenticationCompleteListener() {
+            @Override
+            public void onAuthenticationComplete(BluetoothReader bluetoothReader, int errorCode) {
+                if (errorCode == BluetoothReader.ERROR_SUCCESS) {
+                    Log.d("AcsBaseDevice ", "Authentication Success!");
 
-                        onPowerOn();
-                    } else {
-                        Timber.d("Authentication Failed!");
-                    }
-                });
+                    onPowerOn();
+                } else {
+                    Log.d("AcsBaseDevice ", "Authentication Failed!");
+                }
+            }
+        });
 
         /* Wait for receiving ATR string. */
-        mBluetoothReader
-                .setOnAtrAvailableListener((bluetoothReader, atr, errorCode) -> {
-                    Timber.d("onAtrAvailable");
+        mBluetoothReader.setOnAtrAvailableListener(new BluetoothReader.OnAtrAvailableListener() {
+            @Override
+            public void onAtrAvailable(BluetoothReader bluetoothReader, byte[] atr, int errorCode) {
+                Log.d("AcsBaseDevice ", "onAtrAvailable");
 
-                    if (atr == null) {
-                        if (errorCode == BluetoothReader.ERROR_AUTHENTICATION_REQUIRED) {
-                            Timber.d("onAtrAvailable2");
+                if (atr == null) {
+                    if (errorCode == BluetoothReader.ERROR_AUTHENTICATION_REQUIRED) {
+                        Log.d("AcsBaseDevice ", "onAtrAvailable2");
 
-                            onAuth();
-                        }
-
-                        Timber.d(getErrorString(errorCode));
-                    } else {
-                        Timber.d(BleACSUtils.toHexString(atr));
-
-                        Timber.d("Power On Card");
-
-                        bleDecoder[nowDecoderIndex].onAtrAvailable(bluetoothReader);
+                        onAuth();
                     }
-                });
+
+                    Log.d("AcsBaseDevice ", getErrorString(errorCode));
+                } else {
+                    Log.d("AcsBaseDevice ", BleACSUtils.toHexString(atr));
+
+                    Log.d("AcsBaseDevice ", "Power On Card");
+
+                    bleDecoder[nowDecoderIndex].onAtrAvailable(bluetoothReader);
+                }
+            }
+        });
+
 
         /* Wait for power off response. */
-        mBluetoothReader
-                .setOnCardPowerOffCompleteListener((bluetoothReader, result) -> {
-                    Timber.d("onCardPowerOffComplete");
+        mBluetoothReader.setOnCardPowerOffCompleteListener(new BluetoothReader.OnCardPowerOffCompleteListener() {
+            @Override
+            public void onCardPowerOffComplete(BluetoothReader bluetoothReader, int i) {
+                Log.d("AcsBaseDevice ", "onCardPowerOffComplete");
 
-                    Timber.d(getErrorString(result));
-                });
+                Log.d("AcsBaseDevice ", getErrorString(i));
+            }
+        });
 
         /* Wait for response APDU. */
         mBluetoothReader
@@ -303,29 +311,29 @@ public class AcsBaseDevice {
                             public void onResponseApduAvailable(BluetoothReader bluetoothReader,
                                                                 byte[] apdu, int errorCode) {
 //                                if(bleDecoder[decoderIndex].decode(apdu) == null)
-                                Timber.d("onResponseApduAvailable");
+                                Log.d("AcsBaseDevice ", "onResponseApduAvailable");
 
-                                Timber.d(getResponseString(
+                                Log.d("AcsBaseDevice ", getResponseString(
                                         apdu, errorCode));
 
-                                String decodeStr =
+                                final String decodeStr =
                                         bleDecoder[nowDecoderIndex].decode(bluetoothReader, apdu);
 
                                 if (decodeStr == null) {
-                                    Timber.d("Read Fail");
+                                    Log.d("AcsBaseDevice ", "Read Fail");
 
                                     nowDecoderIndex = (nowDecoderIndex + 1 >= bleDecoder.length)
                                             ? 0 : nowDecoderIndex + 1;
 
-                                    Timber.d("Decoder Index : " + nowDecoderIndex);
+                                    Log.d("AcsBaseDevice ", "Decoder Index : " + nowDecoderIndex);
 
                                     if (nowDecoderIndex != 0) {
                                         onPowerOn();
                                     }
                                 } else if (decodeStr.equals("")) {
-                                    Timber.d("Next Step");
+                                    Log.d("AcsBaseDevice ", "Next Step");
                                 } else if (decodeStr.startsWith("{")) {
-                                    Timber.d("startsWith { ");
+                                    Log.d("AcsBaseDevice ", "startsWith { ");
 
                                     AndroidSchedulers.mainThread().scheduleDirect(
                                             new Runnable() {
@@ -336,19 +344,21 @@ public class AcsBaseDevice {
                                             }
                                     );
                                 } else {
-                                    Timber.d("Not Catched Situation");
+                                    Log.d("AcsBaseDevice ", "Not Catched Situation");
                                 }
                             }
                         });
 
         /* Wait for escape command response. */
-        mBluetoothReader
-                .setOnEscapeResponseAvailableListener((bluetoothReader, response, errorCode) -> {
-                    Timber.d(getResponseString(
-                            response, errorCode));
+        mBluetoothReader.setOnEscapeResponseAvailableListener(new BluetoothReader.OnEscapeResponseAvailableListener() {
+            @Override
+            public void onEscapeResponseAvailable(BluetoothReader bluetoothReader, byte[] bytes, int i) {
+                Log.d("AcsBaseDevice ", getResponseString(bytes, i));
+                Log.d("AcsBaseDevice ", "onEscapeResponseAvailable");
 
-                    Timber.d("onEscapeResponseAvailable");
-                });
+            }
+        });
+
 
 //        /* Wait for device info available. */
 //        mBluetoothReader
@@ -401,30 +411,43 @@ public class AcsBaseDevice {
         /* Wait for battery level available. */
         if (mBluetoothReader instanceof Acr1255uj1Reader) {
             ((Acr1255uj1Reader) mBluetoothReader)
-                    .setOnBatteryLevelAvailableListener((bluetoothReader, batteryLevel, status) -> {
-                        Timber.e("mBatteryLevelListener data: "
-                                + batteryLevel);
+                    .setOnBatteryLevelAvailableListener(new Acr1255uj1Reader.OnBatteryLevelAvailableListener() {
+                        @Override
+                        public void onBatteryLevelAvailable(BluetoothReader bluetoothReader, int batteryLevel,
+                                                            int status) {
+                            Log.e("AcsBaseDevice ",
+                                    "mBatteryLevelListener data: " + getBatteryLevelString(batteryLevel));
 
-                        Timber.d(getBatteryLevelString(batteryLevel));
+                        }
                     });
         }
 
         /* Handle on battery status available. */
         if (mBluetoothReader instanceof Acr3901us1Reader) {
             ((Acr3901us1Reader) mBluetoothReader)
-                    .setOnBatteryStatusAvailableListener((bluetoothReader, batteryStatus, status) -> Timber.d(getBatteryStatusString(batteryStatus)));
+                    .setOnBatteryStatusAvailableListener(new Acr3901us1Reader.OnBatteryStatusAvailableListener() {
+                        @Override
+                        public void onBatteryStatusAvailable(BluetoothReader bluetoothReader, int i, int i1) {
+                            Log.d(
+                                    "AcsBaseDevice ", getBatteryStatusString(i));
+                        }
+                    });
         }
 
         /* Handle on slot status available. */
         mBluetoothReader
-                .setOnCardStatusAvailableListener((bluetoothReader, cardStatus, errorCode) -> {
-                    Timber.d("Card Status : " + cardStatus + " Error Code" + errorCode);
-                    if (errorCode != BluetoothReader.ERROR_SUCCESS) {
-                        Timber.d(getErrorString(errorCode));
-                    } else {
-                        Timber.d(getCardStatusString(cardStatus));
+                .setOnCardStatusAvailableListener(new BluetoothReader.OnCardStatusAvailableListener() {
+                    @Override
+                    public void onCardStatusAvailable(BluetoothReader bluetoothReader, int cardStatus, int errorCode) {
+                        Log.d("AcsBaseDevice ", "Card Status : " + cardStatus + " Error Code" + errorCode);
+                        if (errorCode != BluetoothReader.ERROR_SUCCESS) {
+                            Log.d("AcsBaseDevice ", getErrorString(errorCode));
+                        } else {
+                            Log.d("AcsBaseDevice ", getCardStatusString(cardStatus));
+                        }
                     }
                 });
+
 
         mBluetoothReader
                 .setOnEnableNotificationCompleteListener(new BluetoothReader.OnEnableNotificationCompleteListener() {
@@ -441,7 +464,7 @@ public class AcsBaseDevice {
                                 }
                             });
 
-                            Timber.d("The device is unable to set notification!");
+                            Log.d("AcsBaseDevice ", "The device is unable to set notification!");
                         } else {
                             AndroidSchedulers.mainThread().scheduleDirect(new Runnable() {
                                 @Override
@@ -449,12 +472,12 @@ public class AcsBaseDevice {
                                     callBack.onGattStatusChanged(result);
                                 }
                             });
-                            Timber.d("The device is ready to use!");
+                            Log.d("AcsBaseDevice ", "The device is ready to use!");
                         }
                     }
 
                 });
-        Timber.d("set Listener Over");
+        Log.d("AcsBaseDevice ", "set Listener Over");
     }
 
     /* Get the Battery status string. */
@@ -561,20 +584,20 @@ public class AcsBaseDevice {
 
     private void onPowerOn() {
         if (mBluetoothReader == null) {
-            Timber.d("card_reader_not_ready");
+            Log.d("AcsBaseDevice ", "card_reader_not_ready");
 
             return;
         }
         if (!mBluetoothReader.powerOnCard()) {
-            Timber.d("card_reader_not_ready");
+            Log.d("AcsBaseDevice ", "card_reader_not_ready");
         }
     }
 
     private void onAuth() {
-        Timber.d("onAuth");
+        Log.d("AcsBaseDevice ", "onAuth");
 
         if (mBluetoothReader == null) {
-            Timber.d("card_reader_not_ready");
+            Log.d("AcsBaseDevice ", "card_reader_not_ready");
             return;
         }
 
@@ -586,27 +609,27 @@ public class AcsBaseDevice {
 
         if (masterKey != null && masterKey.length > 0) {
             /* Clear response field for the result of authentication. */
-            Timber.d("noData");
+            Log.d("AcsBaseDevice ", "noData");
 
-            Timber.d("master key = %s", new String(masterKey));
+            Log.d("AcsBaseDevice ", "master key = " + new String(masterKey));
 
             /* Start authentication. */
             if (!mBluetoothReader.authenticate(masterKey)) {
-                Timber.d("card_reader_not_ready");
+                Log.d("AcsBaseDevice ", "card_reader_not_ready");
             } else {
-                Timber.d("Authenticating...");
+                Log.d("AcsBaseDevice ", "Authenticating...");
             }
         } else {
-            Timber.d("Character format error!");
+            Log.d("AcsBaseDevice ", "Character format error!");
         }
     }
 
     private void onAPDU1() {
-        Timber.d("onAPDU1");
+        Log.d("AcsBaseDevice ", "onAPDU1");
 
         /* Check for detected reader. */
         if (mBluetoothReader == null) {
-            Timber.d("card_reader_not_ready");
+            Log.d("AcsBaseDevice ", "card_reader_not_ready");
             return;
         }
         byte[] apduCommand = new byte[]{(byte) 0x00,
@@ -617,37 +640,37 @@ public class AcsBaseDevice {
                 (byte) 0x00, (byte) 0x00, (byte) 0x11, (byte) 0x00};
         if (apduCommand != null && apduCommand.length > 0) {
             /* Clear response field for result of APDU. */
-            Timber.d("noData");
+            Log.d("AcsBaseDevice ", "noData");
 
             /* Transmit APDU command. */
             if (!mBluetoothReader.transmitApdu(apduCommand)) {
-                Timber.d("card_reader_not_ready");
+                Log.d("AcsBaseDevice ", "card_reader_not_ready");
             }
         } else {
-            Timber.d("Character format error!");
+            Log.d("AcsBaseDevice ", "Character format error!");
         }
     }
 
     private void onAPDU2() {
-        Timber.d("onAPDU2");
+        Log.d("AcsBaseDevice ", "onAPDU2");
 
         /* Check for detected reader. */
         if (mBluetoothReader == null) {
-            Timber.d("card_reader_not_ready");
+            Log.d("AcsBaseDevice ", "card_reader_not_ready");
             return;
         }
         byte[] apduCommand = new byte[]{(byte) 0x00, (byte) 0xca, (byte) 0x11,
                 (byte) 0x00, (byte) 0x02, (byte) 0x00, (byte) 0x00};
         if (apduCommand != null && apduCommand.length > 0) {
             /* Clear response field for result of APDU. */
-            Timber.d("noData");
+            Log.d("AcsBaseDevice ", "noData");
 
             /* Transmit APDU command. */
             if (!mBluetoothReader.transmitApdu(apduCommand)) {
-                Timber.d("card_reader_not_ready");
+                Log.d("AcsBaseDevice ", "card_reader_not_ready");
             }
         } else {
-            Timber.d("Character format error!");
+            Log.d("AcsBaseDevice ", "Character format error!");
         }
     }
 

@@ -1,14 +1,14 @@
 package com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.decoder;
 
+import android.util.Log;
+
 import com.acs.smartcard.Reader;
-import com.advmeds.mphr_health_go.cardreader.acs.usb.AcsUsbDevice;
-import com.advmeds.mphr_health_go.room.model.UserModel;
-import com.google.gson.Gson;
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.AcsUsbDevice;
+import com.advmeds.advmeds_cardreader_lib.cardreader.UserModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import timber.log.Timber;
 
 public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
     private final static byte[] SELECT_APDU_THAI = new byte[]{
@@ -43,9 +43,9 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             int activeProtocol = reader.setProtocol(AcsUsbDevice.SMART_CARD_SLOT, Reader.PROTOCOL_TX);
 
             if (activeProtocol == Reader.PROTOCOL_T0) {
-                Timber.d("Set protocol success.");
+                Log.d("AcsUsbThaiDecoder","Set protocol success.");
             } else {
-                Timber.d( "Set protocol error.");
+                Log.d("AcsUsbThaiDecoder", "Set protocol error.");
 
                 return null;
             }
@@ -64,9 +64,9 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             String responseString = bytesToHex(response);
 
             if (responseString.startsWith("61 ")) {
-                Timber.d("Transmit select success.");
+                Log.d("AcsUsbThaiDecoder","Transmit select success.");
             } else {
-                Timber.d("Transmit select error.");
+                Log.d("AcsUsbThaiDecoder","Transmit select error.");
 
                 return null;
             }
@@ -78,7 +78,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             responseString = bytesToHex(response);
 
             if (responseString.startsWith("61 0D")) {
-                Timber.d("Transmit read national id success.");
+                Log.d("AcsUsbThaiDecoder","Transmit read national id success.");
 
                 response = new byte[15];
 
@@ -96,7 +96,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
                     cardID = new String(id);
                 }
             } else {
-                Timber.d( "Transmit read national id error.");
+                Log.d("AcsUsbThaiDecoder", "Transmit read national id error.");
 
                 return null;
             }
@@ -108,7 +108,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             responseString = bytesToHex(response);
 
             if (responseString.startsWith("61 D1")) {
-                Timber.d( "Transmit personal info success.");
+                Log.d("AcsUsbThaiDecoder", "Transmit personal info success.");
 
 
                 response = new byte[211];
@@ -158,7 +158,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
                     }
                 }
             } else {
-                Timber.d("Transmit personal info error.");
+                Log.d("AcsUsbThaiDecoder","Transmit personal info error.");
 
                 return null;
             }
@@ -170,7 +170,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             responseString = bytesToHex(response);
 
             if (responseString.startsWith("61 12")) {
-                Timber.d( "Transmit issued / expired date success.");
+                Log.d("AcsUsbThaiDecoder", "Transmit issued / expired date success.");
 
                 response = new byte[20];
 
@@ -203,12 +203,12 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
                     cardIssuedDate += "/" + year + new String(dateArray);
                 }
             } else {
-                Timber.d("Transmit issued / expired date error.");
+                Log.d("AcsUsbThaiDecoder","Transmit issued / expired date error.");
 
                 return null;
             }
 
-            Gson gson = new Gson();
+//            Gson gson = new Gson();
 
             UserModel userModel = new UserModel();
 
@@ -224,7 +224,7 @@ public class AcsUsbThaiDecoder implements AcsUsbBaseDecoder {
             userModel.setGender(cardGender);
             userModel.setCardType(1);
 
-            return gson.toJson(userModel);
+            return userModel.toString();
         } catch (Exception e) {
             e.printStackTrace();
 

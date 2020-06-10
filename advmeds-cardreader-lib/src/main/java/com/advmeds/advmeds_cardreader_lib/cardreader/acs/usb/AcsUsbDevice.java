@@ -3,12 +3,12 @@ package com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.util.Log;
 
 import com.acs.smartcard.Reader;
-import com.advmeds.mphr_health_go.cardreader.acs.usb.decoder.AcsUsbBaseDecoder;
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.decoder.AcsUsbBaseDecoder;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import timber.log.Timber;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 
 public class AcsUsbDevice {
     private AcsUsbCallBack callBack;
@@ -74,7 +74,7 @@ public class AcsUsbDevice {
                 }
 
                 if (cardAction == Reader.CARD_PRESENT ) { //卡片插入
-                    Timber.d("Card present , slotNum = " + cardType);
+                    Log.d("AcsUsbDevice","Card present , slotNum = " + cardType);
                     switch (cardType) {
                         case SMART_CARD_SLOT:
                             if(usbDecoder != null && powerOnSmartCard()) {
@@ -90,11 +90,11 @@ public class AcsUsbDevice {
 
                                 if(response != null) {
                                     if (response.startsWith("{")) {
-                                        Timber.d("startsWith { ");
+                                        Log.d("AcsUsbDevice","startsWith { ");
 
-                                        Timber.d(response);
+                                        Log.d("AcsUsbDevice",response);
 
-                                        String responseBuf = response;
+                                       final String responseBuf = response;
 
                                         AndroidSchedulers.mainThread().scheduleDirect(
                                                 new Runnable() {
@@ -105,19 +105,21 @@ public class AcsUsbDevice {
                                                 }
                                         );
                                     } else {
-                                        Timber.d(response);
+                                        Log.d("AcsUsbDevice",response);
                                     }
                                 }
                             }
 
                             break;
                         case NFC_CARD_SLOT:
-                            String response = nfcDecoder.decode(reader);
+                           final String response = nfcDecoder.decode(reader);
 
                             if(response != null) {
 
                                 if (response.startsWith("{")) {
-                                    Timber.d("startsWith { ");
+                                    Log.d("AcsUsbDevice","startsWith { ");
+
+
 
                                     AndroidSchedulers.mainThread().scheduleDirect(
                                             new Runnable() {
@@ -128,14 +130,14 @@ public class AcsUsbDevice {
                                             }
                                     );
                                 } else {
-                                    Timber.d(response);
+                                    Log.d("AcsUsbDevice",response);
                                 }
                             }
 
                             break;
                     }
                 } else if (cardAction == Reader.CARD_ABSENT) { //卡片抽離
-                    Timber.d("Card absent : " + cardType);
+                    Log.d("AcsUsbDevice","Card absent : " + cardType);
 
                     if (cardType == SMART_CARD_SLOT) {
                         callBack.onCardRemove();
@@ -150,18 +152,18 @@ public class AcsUsbDevice {
             reader.open(device);
 
             if(reader.isOpened()) {
-                Timber.d("Connect Success");
+//                Log.d("AcsUsbDevice","Connect Success");
 
                 callBack.onConnectSucceess();
             }
             else {
-                Timber.d("Connect Fail");
+                Log.d("AcsUsbDevice","Connect Fail");
 
                 callBack.onConnectFail();
             }
         }
         catch (Exception ex) {
-            Timber.d("Connect Fail");
+            Log.d("AcsUsbDevice","Connect Fail");
 
             callBack.onConnectFail();
         }
@@ -172,11 +174,11 @@ public class AcsUsbDevice {
             byte[] atr = reader.power(SMART_CARD_SLOT, Reader.CARD_WARM_RESET);
 
             if (atr == null) {
-                Timber.d("Power error.");
+                Log.d("AcsUsbDevice","Power error.");
 
                 return false;
             } else {
-                Timber.d("Power success.");
+                Log.d("AcsUsbDevice","Power success.");
 
                 return true;
             }

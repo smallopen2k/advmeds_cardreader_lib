@@ -1,13 +1,12 @@
 package com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.decoder;
 
-import com.acs.smartcard.Reader;
-import com.advmeds.mphr_health_go.MyApplication;
-import com.advmeds.mphr_health_go.R;
-import com.advmeds.mphr_health_go.cardreader.acs.usb.AcsUsbDevice;
-import com.advmeds.mphr_health_go.room.model.UserModel;
-import com.google.gson.Gson;
+import android.util.Log;
 
-import timber.log.Timber;
+import com.acs.smartcard.Reader;
+
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.AcsUsbDevice;
+import com.advmeds.advmeds_cardreader_lib.cardreader.UserModel;
+
 
 public class AcsUsbNfcTWDecoder implements AcsUsbBaseDecoder {
     private static final byte[] READ_NFC_CARD_NO = new byte[]{
@@ -25,33 +24,33 @@ public class AcsUsbNfcTWDecoder implements AcsUsbBaseDecoder {
                     response, response.length);
 
             String resultString = convertNfcBytesToHex(response);
-            Timber.d(resultString);
+            Log.d("AcsUsbThaiDecoder",resultString);
 
             UserModel userModel = new UserModel();
 
-            Gson gson = new Gson();
+//            Gson gson = new Gson();
 
             if (resultString.contains("900000") && resultString.contains("414944")) {
                 String cardNumber = resultString.split("900000")[0];
 
                 userModel.setIcId(cardNumber);
 
-                userModel.setName(MyApplication.getAppContext().getString(R.string.txt_rfid_or_nfc_card_name));
+                userModel.setName("Smart Card");
 
                 userModel.setCardType(2);
 
-                return gson.toJson(userModel);
+                return userModel.toString();
             } else if (resultString.contains("900000")) {
                 String cardNumber = resultString.split("900000")[0];
 
                 if (cardNumber.length() >= 8) {
                     userModel.setIcId(cardNumber);
 
-                    userModel.setName(MyApplication.getAppContext().getString(R.string.txt_rfid_or_nfc_card_name));
+                    userModel.setName("Smart Card");
 
                     userModel.setCardType(2);
 
-                    return gson.toJson(userModel);
+                    return userModel.toString();
                 }
             }
         }

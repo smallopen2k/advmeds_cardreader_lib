@@ -1,14 +1,15 @@
 package com.advmeds.advmeds_cardreader_lib.cardreader.acs.ble.decoder;
 
+import android.util.Log;
+
 import com.acs.bluetooth.BluetoothReader;
-import com.advmeds.mphr_health_go.room.model.UserModel;
-import com.google.gson.Gson;
+import com.advmeds.advmeds_cardreader_lib.cardreader.UserModel;
+
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import timber.log.Timber;
 
 /**
  * Don't Use!!!!
@@ -63,7 +64,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
 
     private String combineCardData() {
         try {
-            Gson gson = new Gson();
+//            Gson gson = new Gson();
 
             UserModel userModel = new UserModel();
 
@@ -80,7 +81,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
             userModel.setGender(cardGender);
             userModel.setCardType(1);
 
-            return gson.toJson(userModel);
+            return userModel.toString();
         }
         catch (ParseException e) {
             e.printStackTrace();
@@ -91,7 +92,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
 
     private boolean sendCommand(BluetoothReader reader, byte[] command) {
         if(reader == null) {
-            Timber.d("CardReader not ready");
+            Log.d("AcsBleThaiDecoder ", "CardReader not ready");
 
             init();
 
@@ -100,7 +101,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
 
         /* Transmit APDU command. */
         if (!reader.transmitApdu(apduCommand1)) {
-            Timber.d("CardReader not ready");
+            Log.d("AcsBleThaiDecoder ", "CardReader not ready");
 
             init();
 
@@ -119,7 +120,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
 
             if (commandPointer == apduCommand1) {
                 if (response.startsWith("61 ")) {
-                    Timber.d("Transmit apdu success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit apdu success.");
 
                     if(!sendCommand(reader, apduCommand2)) return null;
                 } else {
@@ -129,7 +130,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand2) {
                 if (response.startsWith("61 0D")) {
-                    Timber.d("Transmit read national id success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit read national id success.");
 
                     if(!sendCommand(reader, apduCommand3)) return null;
                 } else {
@@ -139,7 +140,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand3) {
                 if (response.endsWith("90 00")) {
-                    Timber.d("Transmit read response id success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit read response id success.");
 
                     byte[] id = new byte[13];
 
@@ -157,7 +158,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand4) {
                 if (response.startsWith("61 D1")) {
-                    Timber.d("Transmit read personal info success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit read personal info success.");
 
                     if(!sendCommand(reader, apduCommand5)) return null;
                 } else {
@@ -167,7 +168,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand5) {
                 if (response.endsWith("90 00")) {
-                    Timber.d("Transmit read response info success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit read response info success.");
 
                     byte[] name = new byte[100];
 
@@ -216,7 +217,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand6) {
                 if (response.startsWith("61 12")) {
-                    Timber.d("Transmit issued / expired date success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit issued / expired date success.");
 
                     if(!sendCommand(reader, apduCommand7)) return null;
                 } else {
@@ -226,7 +227,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                 }
             } else if (commandPointer == apduCommand7) {
                 if (response.endsWith("90 00")) {
-                    Timber.d("Transmit read response date success.");
+                    Log.d("AcsBleThaiDecoder ", "Transmit read response date success.");
 
                     byte[] yearArray = new byte[4];
 
@@ -257,7 +258,7 @@ public class AcsBleThaiDecoder implements AcsBleBaseDecoder {
                     return null;
                 }
             } else {
-                Timber.d("CommandPointer Not Catched ");
+                Log.d("AcsBleThaiDecoder ", "CommandPointer Not Catched ");
 
                 init();
 

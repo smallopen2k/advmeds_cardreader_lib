@@ -1,15 +1,15 @@
 package com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.decoder;
 
+import android.util.Log;
+
 import com.acs.smartcard.Reader;
-import com.advmeds.mphr_health_go.cardreader.acs.usb.AcsUsbDevice;
-import com.advmeds.mphr_health_go.room.model.UserModel;
-import com.google.gson.Gson;
+import com.advmeds.advmeds_cardreader_lib.cardreader.acs.usb.AcsUsbDevice;
+import com.advmeds.advmeds_cardreader_lib.cardreader.UserModel;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
-import timber.log.Timber;
 
 public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
     //暫時不接NFC
@@ -40,9 +40,9 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
             int activeProtocol = reader.setProtocol(AcsUsbDevice.SMART_CARD_SLOT, Reader.PROTOCOL_T1);
 
             if (activeProtocol == Reader.PROTOCOL_T1) {
-                Timber.d("Set protocol success.");
+                Log.d("AcsUsbTWDecoder","Set protocol success.");
             } else {
-                Timber.d( "Set protocol error.");
+                Log.d("AcsUsbTWDecoder", "Set protocol error.");
 
                 return null;
             }
@@ -52,9 +52,9 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
             String responseString = bytesToHex(response);
 
             if (responseString.startsWith("90 00")) {
-                Timber.d("Transmit select success.");
+                Log.d("AcsUsbTWDecoder","Transmit select success.");
             } else {
-                Timber.d("Transmit select error.");
+                Log.d("AcsUsbTWDecoder","Transmit select error.");
 
                 return null;
             }
@@ -65,7 +65,7 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
             reader.transmit(AcsUsbDevice.SMART_CARD_SLOT, READ_PROFILE_APDU, READ_PROFILE_APDU.length, response, response.length);
 
             if(bytesToHex(response).startsWith("90 00")) {
-                Timber.e("Transmit read profile fail 1.");
+                Log.d("AcsUsbTWDecoder","Transmit read profile fail 1.");
 
                 return null;
             }
@@ -73,7 +73,7 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
             String[] responseTmp = bytesToHex(response).split("90 00");
 
             if (responseTmp.length > 1) {
-                Timber.e("Transmit read profile success.");
+                Log.d("AcsUsbTWDecoder","Transmit read profile success.");
 
                 String cardNumber = new String(Arrays.copyOfRange(response, 0, 12));
                 String cardName = new String(Arrays.copyOfRange(response, 12, 32), "Big5").trim();
@@ -85,9 +85,9 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
 //                String cardData = "卡號:" + cardNumber + "\n" + "姓名:" + cardName + "\n" +
 //                        "身分證號碼:" + cardID + "\n" + "出生日期:" + cardBirth + "\n" +
 //                        "性別:" + cardGender + "\n" + "發卡日期:" + cardIssuedDate;
-//                Timber.e("Name = " + cardData);
+//                Log.d("AcsUsbTWDecoder","Name = " + cardData);
 
-                Gson gson = new Gson();
+//                Gson gson = new Gson();
 
                 UserModel userModel = new UserModel();
 
@@ -103,13 +103,13 @@ public class AcsUsbTWDecoder implements AcsUsbBaseDecoder {
                 userModel.setGender(cardGender);
                 userModel.setCardType(1);
 
-                return gson.toJson(userModel);
+                return userModel.toString();
             } else if (responseTmp.length == 1) {
-                Timber.e("Transmit read profile fail 2.");
+                Log.d("AcsUsbTWDecoder","Transmit read profile fail 2.");
 
                 return null;
             } else {
-                Timber.e("Transmit read profile fail 3.");
+                Log.d("AcsUsbTWDecoder","Transmit read profile fail 3.");
 
                 return null;
             }
